@@ -1,7 +1,17 @@
 "use server";
 
 import { ID, Query } from "node-appwrite"
-import { users } from "../appwrite.config"
+import { InputFile} from "node-appwrite/file"
+import { 
+    BUCKET_ID, 
+    DATABASE_ID, 
+    ENDPOINT, 
+    PATIENT_COLLECTION_ID, 
+    PROJECT_ID, 
+    databases, 
+    storage, 
+    users 
+} from "../appwrite.config"
 import { parseStringify } from "../utils";
 
 export const createUser = async (user: CreateUserParams) => {
@@ -42,3 +52,52 @@ export const getUser = async (userId: string) => {
         console.log(error)
     }
 }
+
+
+/**
+ * Registers a new patient.
+ * @param patient The patient's information.
+ * @param identificationDocument The patient's identification document.
+ * @returns The newly created patient if successful, otherwise `undefined`.
+ */
+export const registerPatient = async ({ identificationDocument, ...patient }: 
+    RegisterUserParams) => {
+        try {
+            let file;
+
+            if (identificationDocument) {
+                const inputFile = InputFile.fromBuffer(
+                    identificationDocument?.get('blobFile') as Blob, 
+                    identificationDocument?.get('fileName') as string
+                );
+
+                file = await storage.createFile(
+                    BUCKET_ID!,
+                    ID.unique(),
+                    inputFile
+                )
+            }
+
+            console.log(
+                {
+                    identificationDocumentId: file?.$id || null,
+                    identificationDocumentUrl: `${ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${file?.$id}/view?project=${PROJECT_ID}`,
+                }
+            )
+
+            const newPatient = await databases.createDocument(
+                DATABASE_ID!,
+                PATIENT_COLLECTION_ID!,
+                ID.unique(),
+                {
+                    identificationDocumentId: file?.$id || null,
+                    identificationDocumentUrl: `${ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${file?.$id}/view?project=${PROJECT_ID}`,
+                    ...patient
+                }
+            )
+
+            return parseStringify(newPatient);
+        } catch (error) {
+            console.log("An error occurred while creating a new patient:", error);
+        }
+    }

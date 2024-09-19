@@ -8,6 +8,7 @@ import {useDropzone} from 'react-dropzone'
 type FileUploaderProps = {
     files: File[] | undefined,
     onChange: (files: File[]) => void
+    // onChange is a function that accepts files
 }
 
 const FileUploader = ({ files, onChange }: FileUploaderProps) => {
@@ -24,9 +25,9 @@ const FileUploader = ({ files, onChange }: FileUploaderProps) => {
       {files && files?.length > 0 ? (
         <Image
             src={convertFileToUrl(files[0])}
-            width={1000} height={1000}
-            alt='uploaded image' className='max-h-[400px] overflow-hidden
-            object-cover'
+            width={500} height={300}
+            alt='uploaded image' 
+            className='max-h-[400px] overflow-hidden object-cover'
         />
       ): (
         <>
@@ -42,7 +43,7 @@ const FileUploader = ({ files, onChange }: FileUploaderProps) => {
                     or drag and drop
                 </p>
                 <p>
-                    JPEG, PNG, JPG, GIF up to 10MB (max 800x400)
+                    JPEG, PNG, JPG formats allowed. (max 800x400)
                 </p>
             </div>
         </>
