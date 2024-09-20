@@ -73,10 +73,9 @@ const AppointmentForm = ({
 
         if (appointment) {
             form.reset();
-            router.push(`/patients/${userId}/new-appointment/success?appointmentId=${appointment.id}`)
+            router.push(`/patients/${userId}/new-appointment/success?appointmentId=${appointment.$id}`)
         }
       }
-
 
     } catch (error) {
       console.error(error)
